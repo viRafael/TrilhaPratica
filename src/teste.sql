@@ -27,7 +27,7 @@ CREATE TABLE ESTABELECIAMENTO (
     nm_estab VARCHAR(60), 
     cnpj_estab  VARCHAR(60),
     localizacao_estab VARCHAR(), 
-    endereco_estab VARCHAR(5), -- DUVIDA
+    endereco_estab VARCHAR(5), -- DUVIDA, diz para fazer um VECTOR
     UF_estab VARCHAR(2),
     cidade_estab VARCHAR(5)
 ); 
@@ -45,7 +45,7 @@ CREATE TABLE FORNECEDOR (
     cp_cod_forn INT SERIAL PRIMARY KEY, 
     cnpj_forn VARCHAR(14),
     localizacao_forn INT,
-    endereco_forn VARCHAR(200), -- DUVIDA
+    endereco_forn VARCHAR(200), -- DUVIDA, diz para fazer um VECTOR
     UF_forn VARCHAR(2),
     cidade_forn VARCHAR(5)
 ); 
@@ -62,9 +62,12 @@ CREATE TABLE VENDER (
     ce_id_produto INT PRIMARY KEY -- CHAVE ESTRANGEIRA
 ); 
 
--- Adicionando CONSTRAINT para tabela PRODUTOR
+-- Adicionando CONSTRAINT para tabela PRODUTO
 ALTER TABLE PRODUTO
 FOREIGN KEY(ce_id_produtor) REFERENCES (cp_id_produtor)
+FOREIGN KEY(ce_rfid) REFERENCES (cp_id_dispositivo)    
+FOREIGN KEY(ce_categoria_principal) REFERENCES (cp_cod_categoria)
+FOREIGN KEY(ce_categoria_secundaria) REFERENCES (cp_cod_categoria)    
 
 -- Adicionando CONSTRAINT para tabela FORNECER
 ALTER TABLE FORNECER
