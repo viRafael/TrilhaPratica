@@ -2,6 +2,18 @@
 -- 1, eu crio um atributo que depois eu informo que ela é chave estrangeira, nesse sentido, 
 -- que tipo de dado tem que ser a chave, do mesmo que é a chave ou tanto faz?
 
+-- Bem, tem uma coisa que ainda não entendi. O professor disse que como minha tabela FUNCIONARIO 
+-- estava ligada a RFID teriamos que fazer ( durante uma querry ) um JOIN de FUNCIONARIO AND RFID só 
+-- para conseguimos acessar alguma informação de FUNCIONARIO. Entretanto, quando eu fiz essa mudança 
+-- no modelo relacional e depois passei pro código, não precisei mudar nada. Onde que essa diferença 
+-- das alocações das tabelas vai estar? Tipo, por eu que fazer um join quando FUNCIONARIO está ligado 
+-- RFID se quando eu tirei essa dependência e liguei direto a PRODUTO não mudou nada?
+
+-- Outra pergunta, no meu DER a tabela PRODUTO é central, ou seja, todas as outras coisas se ligam 
+-- exclusivamente com PRODUTO. Então para cada tabela que está relacionada com a PRODUTO eu terei 
+-- que ter uma chave estrangeira do id_produto para completar essa ligação? Caso seja assim torna a 
+-- duvida de cima um pouco mais entendível, o que explicava um pouco e sana a duvida. Enfim.
+
 -- Tabela PRODUTO
 CREATE TABLE PRODUTO ( 
     cp_id_produto SERIAL PRIMARY KEY,
