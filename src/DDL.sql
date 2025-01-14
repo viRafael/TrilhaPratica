@@ -1,105 +1,93 @@
--- DUVIDAS:
--- 1, eu crio um atributo que depois eu informo que ela é chave estrangeira, nesse sentido, 
--- que tipo de dado tem que ser a chave, do mesmo que é a chave ou tanto faz?
-
--- Bem, tem uma coisa que ainda não entendi. O professor disse que como minha tabela FUNCIONARIO 
--- estava ligada a RFID teriamos que fazer ( durante uma querry ) um JOIN de FUNCIONARIO AND RFID só 
--- para conseguimos acessar alguma informação de FUNCIONARIO. Entretanto, quando eu fiz essa mudança 
--- no modelo relacional e depois passei pro código, não precisei mudar nada. Onde que essa diferença 
--- das alocações das tabelas vai estar? Tipo, por eu que fazer um join quando FUNCIONARIO está ligado 
--- RFID se quando eu tirei essa dependência e liguei direto a PRODUTO não mudou nada?
-
--- Outra pergunta, no meu DER a tabela PRODUTO é central, ou seja, todas as outras coisas se ligam 
--- exclusivamente com PRODUTO. Então para cada tabela que está relacionada com a PRODUTO eu terei 
--- que ter uma chave estrangeira do id_produto para completar essa ligação? Caso seja assim torna a 
--- duvida de cima um pouco mais entendível, o que explicava um pouco e sana a duvida. Enfim.
-
--- Tabela PRODUTO
 CREATE TABLE PRODUTO ( 
     cp_id_produto SERIAL PRIMARY KEY,
-    nm_prod VARCHAR(60) NOT NULL,        
-    cd_ean_prod VARCHAR(12) NOT NULL,   
+    nm_prod varchar(60),  
+    cd_ean_prod varchar(12) UNIQUE,    
+    ce_cod_estab INT, -- CHAVE ESTRANGEIRA
+    ce_cod_func INT, -- CHAVE ESTRANGEIRA
     ce_id_dispositivo INT, -- CHAVE ESTRANGEIRA
-    ce_categoria_principal INT, -- CHAVE ESTRANGEIRA
-    ce_categoria_secundaria INT, -- CHAVE ESTRANGEIRA 
-    ce_cod_estab INT -- CHAVE ESTRANGEIRA 
+    ce_categoria_principal INT, -- CHAVE ESTRANGEIRA  
+    ce_categoria_secundaria INT -- CHAVE ESTRANGEIRA 
 ); 
 
--- Tabela RFID
 CREATE TABLE RFID ( 
-    cp_id_dispositivo SERIAL PRIMARY KEY, 
-    ind_venda_dispositivo BOOLEAN NOT NULL 
+    cp_id_dispositivo SERIAL PRIMARY KEY,  
+    ind_venda_dispositivo BOOLEAN 
 ); 
 
--- Tabela CATEGORIA
 CREATE TABLE CATEGORIA ( 
     cp_cod_categoria SERIAL PRIMARY KEY,  
-    nm_categoria VARCHAR(20) NOT NULL,  
-    conteiner_min INT NOT NULL, 
-    conteiner_max INT NOT NULL, 
-    estq_min INT NOT NULL,    
-    estq_max INT NOT NULL
+    nm_categoria varchar(20), 
+    conteiner_max INT,  
+    conteiner_min INT,  
+    estq_min INT,   
+    estq_max INT 
 ); 
 
--- Tabela ESTABELECIMENTO
 CREATE TABLE ESTABELECIMENTO ( 
     cp_cod_estab SERIAL PRIMARY KEY, 
-    nm_estab VARCHAR(60) NOT NULL, 
-    cnpj_estab VARCHAR(60) NOT NULL,  
-    UF_estab VARCHAR(2) NOT NULL, 
-    cidade_estab VARCHAR(5) NOT NULL, 
-    endereco_estab VARCHAR(200) NOT NULL,     
-    localizacao_estab INT, -- DUVIDA, AQ É UM FLOAT VECTOR  
-    tipo BOOLEAN -- tipo, 0 se for conteiner e 1 se for fornecedor  
-); 
+    nm_estab varchar(60),  
+    cnpj_estab varchar(60),             
+    cidade_estab varchar(5), 
+    endereco_estab varchar(200), 
+    UF_estab varchar(2),
+    localizacao_estab float[8],
+    tipo varchar(20)    -- Deposito ou Loja
+);                      
 
--- Tabela FUNCIONARIOS
 CREATE TABLE FUNCIONARIOS ( 
-    cp_cod_func SERIAL PRIMARY KEY,  
-    nm_func VARCHAR(200) NOT NULL,  
-    cpf_func VARCHAR(11) NOT NULL UNIQUE,  
-    funcao_func VARCHAR(40) NOT NULL    
+    cp_cod_func SERIAL PRIMARY KEY,
+    nm_func varchar(200),  
+    cpf_func varchar(11),  
+    funcao_func varchar(40)  
 ); 
 
--- Tabela FORNECEDOR
-CREATE TABLE FORNECEDOR (
+CREATE TABLE FORNECEDOR ( 
     cp_cod_forn SERIAL PRIMARY KEY, 
-    cnpj_forn VARCHAR(14),   
-    UF_forn VARCHAR(2),  
-    cidade_forn VARCHAR(5),
-    endereco_forn VARCHAR(200),   
-    localizacao_forn INT, -- DUVIDA, AQ É UM FLOAT VECTOR       
-    dt_ultima_compra INT  -- PENSEI Q PODERIA TER UM VALOR QUE INCREMENTA POR DIA, AUTOMATICO
+    cnpj_forn varchar(60), 
+    cidade_forn varchar(60), 
+    endereco_forn varchar(60), 
+    UF_forn varchar(60),  
+    localizacao_forn float[8] 
 ); 
 
--- Tabela FORNECER
-CREATE TABLE Fornecer ( 
+CREATE TABLE Fornecedor_Produto ( 
+    cp_cod_forn SERIAL PRIMARY KEY,  
+    dt_compra varchar(10),
+    preco_compra float, 
+    dt_venda varchar(10),  
+    preco_venda float,  
+    dt_vencimento varchar(10),  
     ce_id_produto INT, -- CHAVE ESTRANGEIRA 
-    ce_cod_forn INT   -- CHAVE ESTRANGEIRA
-); 
+    ce_cod_forn INT -- CHAVE ESTRANGEIRA
+);
 
--- Adicionando CONSTRAINS para PRODUTO
+-- Adicionando Constrains
+-- ADD para PRODUTO
+ALTER TABLE PRODUTO 
+ADD FOREIGN KEY(ce_cod_estab) 
+REFERENCES ESTABELECIAMENTO (cp_cod_estab);
+
+ALTER TABLE PRODUTO 
+ADD FOREIGN KEY(ce_cod_func) 
+REFERENCES FUNCIONARIOS (cp_cod_func);
+
 ALTER TABLE PRODUTO 
 ADD FOREIGN KEY(ce_id_dispositivo) 
-REFERENCES RFID(cp_id_dispositivo);
+REFERENCES RFID (cp_id_dispositivo);
 
 ALTER TABLE PRODUTO 
 ADD FOREIGN KEY(ce_categoria_principal) 
-REFERENCES CATEGORIA(cp_cod_categoria);
+REFERENCES CATEGORIA (cp_cod_categoria);
 
 ALTER TABLE PRODUTO 
 ADD FOREIGN KEY(ce_categoria_secundaria) 
-REFERENCES CATEGORIA(cp_cod_categoria);
+REFERENCES CATEGORIA (cp_cod_categoria);
 
-ALTER TABLE PRODUTO 
-ADD FOREIGN KEY(ce_cod_estab) 
-REFERENCES ESTABELECIMENTO(cp_cod_estab);
-
--- Adicionando CONSTRAINS para FORNECER
-ALTER TABLE FORNECER
+-- ADD para Fornecedor_Produto
+ALTER TABLE Fornecedor_Produto 
 ADD FOREIGN KEY(ce_id_produto) 
-REFERENCES PRODUTO(cp_id_produto);
+REFERENCES PRODUTO (cp_id_produto);
 
-ALTER TABLE FORNECER
+ALTER TABLE Fornecedor_Produto
 ADD FOREIGN KEY(ce_cod_forn) 
-REFERENCES FORNECEDOR(cp_cod_forn);
+REFERENCES FORNECEDOR (cp_cod_forn);
