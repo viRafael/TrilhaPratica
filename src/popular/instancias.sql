@@ -42,15 +42,6 @@ SELECT
 FROM generate_series(1, 100)
 LIMIT 100;
 
--- Populando a tabela FUNCIONARIO
-INSERT INTO FUNCIONARIOS (nm_func, cpf_func, funcao_func)
-SELECT
-    'Funcionário ' || generate_series(1, 100),
-    to_char(random() * 10000000000, 'FM00000000000'), -- CPF com 11 dígitos
-    'Vendedor' || (random() * 5)::int
-FROM generate_series(1, 100)
-LIMIT 100;
-
 -- Inserindo 200 registros em RFID
 INSERT INTO RFID (ind_venda_dispositivo)
 SELECT random() > 0.5 -- 50% de chance de ser TRUE, 50% de ser FALSE
@@ -157,3 +148,45 @@ INSERT INTO PRODUTO (nm_prod, cd_ean_prod, ce_cod_estab, ce_cod_func, ce_id_disp
 ('Produto 98', 000000000098, 32, 14, 98, 37, 81),
 ('Produto 99', 000000000099, 126, 50, 99, 16, 60),
 ('Produto 100', 000000000100, 55, 68, 100, 45, 74);
+
+-- Populando tabela fornecedor_produto
+DO $$
+DECLARE
+    v_produto_id PRODUTO.cp_id_produto%TYPE;
+    v_fornecedor_id FORNECEDOR.cp_cod_forn%TYPE;
+    v_data_compra VARCHAR(10);
+    v_data_venda VARCHAR(10);
+    v_data_vencimento VARCHAR(10);
+    v_preco_compra FLOAT;
+    v_preco_venda FLOAT;
+BEGIN
+    FOR i IN 1..200 LOOP -- Loop para inserir 200 instâncias
+        -- Seleciona um produto e um fornecedor aleatórios, evitando combinações duplicadas
+        SELECT p.cp_id_produto, f.cp_cod_forn INTO v_produto_id, v_fornecedor_id
+        FROM PRODUTO p, FORNECEDOR f
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM Fornecedor_Produto fp
+            WHERE fp.ce_id_produto = p.cp_id_produto AND fp.ce_cod_forn = f.cp_cod_forn
+        )
+        ORDER BY random()
+        LIMIT 1;
+
+        -- Verifica se um produto e fornecedor foram encontrados (importante para evitar erros)
+        IF v_produto_id IS NOT NULL AND v_fornecedor_id IS NOT NULL THEN
+            -- Gera datas aleatórias nos últimos 2 anos
+            v_data_compra := (CURRENT_DATE - (random() * 730)::INTEGER)::TEXT; -- Aproximadamente 2 anos em dias
+            v_data_vencimento := (CURRENT_DATE + (random() * 365)::INTEGER)::TEXT; -- Aproximadamente 1 ano a frente
+            v_data_venda := (CURRENT_DATE + (random() * 180)::INTEGER)::TEXT;-- Aproximadamente 6 meses a frente
+
+            -- Gera preços aleatórios, garantindo que o preço de venda seja maior que o de compra
+            v_preco_compra := (random() * 100) + 10; -- Preço de compra entre 10 e 110
+            v_preco_venda := v_preco_compra * (1 + random() * 0.5); -- Preço de venda entre 100% e 150% do preço de compra
+
+            -- Insere o registro na tabela Fornecedor_Produto
+            INSERT INTO Fornecedor_Produto (dt_compra, preco_compra, dt_venda, preco_venda, dt_vencimento, ce_id_produto, ce_cod_forn)
+            VALUES (v_data_compra, v_preco_compra, v_data_venda, v_preco_venda, v_data_vencimento, v_produto_id, v_fornecedor_id);
+        END IF;
+
+    END LOOP;
+END $$;
