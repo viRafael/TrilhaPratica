@@ -12,7 +12,7 @@ BEGIN
 END;
 $$;
 
--- 2 Retorna 
+-- 2 Retorna os fornecedores mais frequentes
 CREATE OR REPLACE PROCEDURE sp_fornecedores_mais_frequentes_menor_custo()
 LANGUAGE plpgsql
 AS $$
