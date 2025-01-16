@@ -12,18 +12,21 @@ BEGIN
 END;
 $$;
 
--- 2 Como posso calcular o valor total de um pedido em um sistema de loja online?
-CREATE OR REPLACE PROCEDURE calcular_valor_total_pedido(
-    p_id_pedido INTEGER,
-    OUT p_valor_total NUMERIC
-)
+-- 2 Retorna 
+CREATE OR REPLACE PROCEDURE sp_fornecedores_mais_frequentes_menor_custo()
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    SELECT SUM(item.quantidade * produto.preco)
-    INTO p_valor_total
-    FROM itens_pedido item
-    INNER JOIN produtos produto ON item.id_produto = produto.id_produto
-    WHERE item.id_pedido = p_id_pedido;
+    SELECT  
+        f.cp_cod_forn AS codigo_fornecedor,
+        f.cnpj_forn AS cnpj_fornecedor,
+        p.ce_categoria_principal AS categoria_principal,
+        COUNT(*) AS quantidade_compras,
+        AVG(fp.preco_compra) AS custo_medio
+    FROM Fornecedor_Produto fp
+    INNER JOIN FORNECEDOR f ON fp.ce_cod_forn = f.cp_cod_forn
+    INNER JOIN PRODUTO p ON fp.ce_id_produto = p.cp_id_produto
+    GROUP BY f.cp_cod_forn, f.cnpj_forn, p.ce_categoria_principal
+    ORDER BY p.ce_categoria_principal, quantidade_compras DESC, custo_medio ASC;
 END;
 $$;
