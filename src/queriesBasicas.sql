@@ -1,12 +1,12 @@
 -- 1 Listar todos os produtos com preço acima de 50
-SELECT nm_prod 
-FROM PRODUTO 
+SELECT ce_id_produto 
+FROM fornecedor_produto
 WHERE preco_venda > 50;
 
 -- 2 Encontrar produtos com um determinado código de barras
 SELECT * 
 FROM PRODUTO 
-WHERE cd_ean_prod = '000000000025';
+WHERE cd_ean_prod = '25';
 
 -- 3 Listar os 10 primeiros produtos por nome
 SELECT * 
@@ -32,7 +32,7 @@ WHERE funcao_func = 'Func5';
 -- 7 Encontrar funcionários com CPF começando com '123'
 SELECT * 
 FROM FUNCIONARIOS 
-WHERE cpf_func LIKE '123%';
+WHERE cpf_func LIKE '1%';
 
 -- 8 Listar todas as categorias com estoque mínimo maior que 100
 SELECT * 
